@@ -1,4 +1,4 @@
-#designed for r 3.25
+#designed for r 3.30
 if(!require(Hmisc)) {
   install.packages("Hmisc")
 }
@@ -87,13 +87,13 @@ text(x=0.5, y=0.1,paste("Prepared by Institutional Assessment and Research, Cali
 
 #Q1
 sjp.frq(factor(csumbes_Selected$Q1_Label),coord.flip = T,geom.colors = colorset[4],sort.frq = "asc"
-        ,axisTitle.x=get_label(csumbes_Selected$Q1_Label),title="")
+        ,axis.title=get_label(csumbes_Selected$Q1_Label),title="")
 
 #Q2-3 (freq)
-plot1 <- sjp.frq(factor(csumbes_Selected$Q2_Label),printPlot = F, coord.flip = T,geom.colors = colorset[4]
-                 ,axisTitle.x=get_label(csumbes_Selected$Q2_Label),title = "",axisLimits.y = c(0,cases * 1.25))
-plot2 <- sjp.frq(factor(csumbes_Selected$Q3_Label),printPlot = F,coord.flip = T,geom.colors = colorset[4]
-                   ,axisTitle.x=get_label(csumbes_Selected$Q3_Label),title="",axisLimits.y = c(0,cases * .8))
+plot1 <- sjp.frq(factor(csumbes_Selected$Q2_Label),prnt.plot = F, coord.flip = T,geom.colors = colorset[4]
+                 ,axis.title=get_label(csumbes_Selected$Q2_Label),title = "",ylim = c(0,cases * 1.25))
+plot2 <- sjp.frq(factor(csumbes_Selected$Q3_Label),prnt.plot = F,coord.flip = T,geom.colors = colorset[4]
+                   ,axis.title=get_label(csumbes_Selected$Q3_Label),title="",ylim = c(0,cases * .8))
 grid.arrange(plot1$plot, plot2$plot, ncol = 2)
 
 #Q4-Q14 set (importance)
@@ -113,9 +113,9 @@ items <- c(label(csumbes_Selected$Q4), label(csumbes_Selected$Q5),label(csumbes_
 sjp.likert(csumbes_likerts_importance,
            geom.colors=colorset,reverse.colors=T,
            catcount=4, cat.neutral=5,cat.neutral.color = neutralColor,
-           showPercentageSign=T, legendTitle="Response",includeN=T,showItemLabels=T,value.labels="sum.outside",
-           hideLegend=F,expand.grid=F, labelDigits=0,axisTitle.x="Statement",gridRange = 1.4, printPlot=T
-           ,axisLabels.y = items,legendLabels = labels
+           show.prc=T, legend.title="Response",show.n=T,values="sum.outside",
+           show.legend=T,expand.grid=F, digits=0,axis.title="Statement",prnt.plot=T
+           ,axis.labels = items,legend.labels = labels,grid.range = 1.4
            ,title = paste(grp_labels[i]," CSUMBES16: Importance - Questions 4 - 14"))
 
 #Q15-25 set
@@ -142,22 +142,47 @@ sjp.likert(csumbes_likerts_satisfaction,
            reverse.colors=T,
            catcount=4, 
            cat.neutral=5,cat.neutral.color = neutralColor,
-           showPercentageSign=T, 
-           legendTitle="Response",
-           includeN=T,
-           showItemLabels=T,
-           value.labels="sum.outside",
-           hideLegend=F,
+           show.prc=T, 
+           legend.title="Response",
+           show.n=T,
+           
+           values="sum.outside",
+           show.legend=T,
            expand.grid=F, 
-           labelDigits=0, 
-           axisTitle.x="Statement",
-           gridRange = 1.4,
-           printPlot=T
-           ,axisLabels.y = items
-           ,legendLabels = labels
+           digits=0, 
+           axis.title="Statement",
+           grid.range = 1.4,
+           prnt.plot=T
+           ,axis.labels = items
+           ,legend.labels = labels
            ,title = paste(grp_labels[i]," CSUMBES16: Satisfaction - Questions 15 - 25"))
 csumbes_likerts_satisfaction_1 <- csumbes_likerts_satisfaction
-#sjt.frq(csumbes_likerts_satisfaction,file=paste(grp_labels[i]," CSUMBES.html"))
+#Q26 Sustainability
+csumbes_sustainability <- data.frame(rbind(cbind(label(csumbes_Selected$Q26_1),table(csumbes_Selected$Q26_1))
+      ,cbind(label(csumbes_Selected$Q26_2),table(csumbes_Selected$Q26_2))
+      ,cbind(label(csumbes_Selected$Q26_3),table(csumbes_Selected$Q26_3))
+      ,cbind(label(csumbes_Selected$Q26_4),table(csumbes_Selected$Q26_4))
+      ,cbind(label(csumbes_Selected$Q26_5),table(csumbes_Selected$Q26_5))
+      ,cbind(label(csumbes_Selected$Q26_6),table(csumbes_Selected$Q26_6))
+      ,cbind(label(csumbes_Selected$Q26_7),table(csumbes_Selected$Q26_7))
+      ,cbind(label(csumbes_Selected$Q26_8),table(csumbes_Selected$Q26_8))
+      ,cbind(label(csumbes_Selected$Q26_9),table(csumbes_Selected$Q26_9))
+      ,cbind(label(csumbes_Selected$Q26_10),table(csumbes_Selected$Q26_10))
+      ,cbind(label(csumbes_Selected$Q26_11),table(csumbes_Selected$Q26_11))
+      ))
+colnames(csumbes_sustainability) <- c("Sustainability.related.system","Responses")
+csumbes_sustainability$Responses <- as.numeric(as.character(csumbes_sustainability$Responses))
+moreColors <- cbind(colorset,colorset,csumbColors)
+plot1 <- ggplot(csumbes_sustainability,aes(Sustainability.related.system,Responses,fill=Sustainability.related.system))+
+  geom_bar(stat="identity",position="dodge")+
+  coord_flip()+ 
+  ggtitle("Sustainability-related system")+
+  xlab("Sustainability-related system")+
+  ylab(paste("Responses"))+
+  ylim(0,max(as.numeric(as.character(csumbes_sustainability$Responses))) * 1.25)+
+  scale_fill_manual(values = moreColors)+
+  geom_text(aes(label=format(csumbes_sustainability$Responses,big.mark = ",")), position=position_dodge(width=0.9), vjust=0.3, hjust=-0.1)
+plot1 + theme(legend.title = element_blank(),legend.position="none")
 #Q27-36 set
 csumbes_likerts_satisfaction <- data.frame(csumbes_Selected$Q27,csumbes_Selected$Q28,csumbes_Selected$Q29,csumbes_Selected$Q30,csumbes_Selected$Q31
                                            ,csumbes_Selected$Q32,csumbes_Selected$Q33,csumbes_Selected$Q34,csumbes_Selected$Q35,csumbes_Selected$Q36)
@@ -174,9 +199,9 @@ items <- c(label(csumbes_Selected$Q27), label(csumbes_Selected$Q28),label(csumbe
 sjp.likert(csumbes_likerts_satisfaction,
            geom.colors=colorset,reverse.colors=T,
            catcount=4, cat.neutral=5,cat.neutral.color = neutralColor,
-           showPercentageSign=T, legendTitle="Response",includeN=T,showItemLabels=T,value.labels="sum.outside",
-           hideLegend=F,expand.grid=F, labelDigits=0,axisTitle.x="Statement",gridRange = 1.4, printPlot=T
-           ,axisLabels.y = items,legendLabels = labels
+           show.prc=T, legend.title="Response",show.n=T,values="sum.outside",
+           show.legend=T,expand.grid=F, digits=0,axis.title="Statement",grid.range = 1.4, prnt.plot=T
+           ,axis.labels = items,legend.labels = labels
            ,title = paste(grp_labels[i]," CSUMBES16: Satisfaction - Questions 27 - 36"))
 csumbes_likerts_satisfaction_2 <- csumbes_likerts_satisfaction
 #Q37-45 set
@@ -195,9 +220,9 @@ items <- c(label(csumbes_Selected$Q37), label(csumbes_Selected$Q38),label(csumbe
 sjp.likert(csumbes_likerts_satisfaction,
            geom.colors=colorset,reverse.colors=T,
            catcount=4, cat.neutral=5,cat.neutral.color = neutralColor,
-           showPercentageSign=T, legendTitle="Response",includeN=T,showItemLabels=T,value.labels="sum.outside",
-           hideLegend=F,expand.grid=F, labelDigits=0,axisTitle.x="Statement",gridRange = 1.4, printPlot=T
-           ,axisLabels.y = items,legendLabels = labels
+           show.prc=T, legend.title="Response",show.n=T,values="sum.outside",
+           show.legend=T,expand.grid=F, digits=0,axis.title="Statement",grid.range = 1.4, prnt.plot=T
+           ,axis.labels = items,legend.labels = labels
            ,title = paste(grp_labels[i]," CSUMBES16: Satisfaction - Questions 37 - 45"))
 csumbes_likerts_satisfaction_3 <- csumbes_likerts_satisfaction
 #Q46-51 set
@@ -215,9 +240,9 @@ items <- c(label(csumbes_Selected$Q46), label(csumbes_Selected$Q47),label(csumbe
 sjp.likert(csumbes_likerts_satisfaction,
            geom.colors=colorset,reverse.colors=T,
            catcount=4, cat.neutral=5,cat.neutral.color = neutralColor,
-           showPercentageSign=T, legendTitle="Response",includeN=T,showItemLabels=T,value.labels="sum.outside",
-           hideLegend=F,expand.grid=F, labelDigits=0,axisTitle.x="Statement",gridRange = 1.4, printPlot=T
-           ,axisLabels.y = items,legendLabels = labels
+           show.prc=T, legend.title="Response",show.n=T,values="sum.outside",
+           show.legend=T,expand.grid=F, digits=0,axis.title="Statement",grid.range = 1.4, prnt.plot=T
+           ,axis.labels = items,legend.labels = labels
            ,title = paste(grp_labels[i]," CSUMBES16: Satisfaction - Questions 46 - 51"))
 csumbes_likerts_satisfaction_4 <- csumbes_likerts_satisfaction
 #Q52-59 set
@@ -242,9 +267,9 @@ items <- c(label(csumbes_Selected$Q52), label(csumbes_Selected$Q53),label(csumbe
 sjp.likert(csumbes_likerts_satisfaction,
            geom.colors=colorset,reverse.colors=T,
            catcount=4, cat.neutral=5,cat.neutral.color = neutralColor,
-           showPercentageSign=T, legendTitle="Response",includeN=T,showItemLabels=T,value.labels="sum.outside",
-           hideLegend=F,expand.grid=F, labelDigits=0,axisTitle.x="Statement",gridRange = 1.4, printPlot=T
-           ,axisLabels.y = items,legendLabels = labels
+           show.prc=T, legend.title="Response",show.n=T,values="sum.outside",
+           show.legend=T,expand.grid=F, digits=0,axis.title="Statement",grid.range = 1.4, prnt.plot=T
+           ,axis.labels = items,legend.labels = labels
            ,title = paste(grp_labels[i]," CSUMBES16: Satisfaction - Questions 52 - 59"))
 csumbes_likerts_satisfaction_5 <- csumbes_likerts_satisfaction
 #Q60-66 set
@@ -269,9 +294,9 @@ items <- c(label(csumbes_Selected$Q60), label(csumbes_Selected$Q61),label(csumbe
 sjp.likert(csumbes_likerts_satisfaction,
            geom.colors=colorset,reverse.colors=T,
            catcount=4, cat.neutral=5,cat.neutral.color = neutralColor,
-           showPercentageSign=T, legendTitle="Response",includeN=T,showItemLabels=T,value.labels="sum.outside",
-           hideLegend=F,expand.grid=F, labelDigits=0,axisTitle.x="Statement",gridRange = 1.4, printPlot=T
-           ,axisLabels.y = items,legendLabels = labels
+           show.prc=T, legend.title="Response",show.n=T,values="sum.outside",
+           show.legend=T,expand.grid=F, digits=0,axis.title="Statement",grid.range = 1.4, prnt.plot=T
+           ,axis.labels = items,legend.labels = labels
            ,title = paste(grp_labels[i]," CSUMBES16: Satisfaction - Questions 60 - 66"))
 csumbes_likerts_satisfaction_6 <- csumbes_likerts_satisfaction
 #Q67-72 set agreement
@@ -290,9 +315,9 @@ items <- c(label(csumbes_Selected$Q67), label(csumbes_Selected$Q68),label(csumbe
 sjp.likert(csumbes_likerts_agreement,
            geom.colors=colorset,reverse.colors=T,
            catcount=4, cat.neutral=5,cat.neutral.color = neutralColor,
-           showPercentageSign=T, legendTitle="Response",includeN=T,showItemLabels=T,value.labels="sum.outside",
-           hideLegend=F,expand.grid=F, labelDigits=0,axisTitle.x="Statement",gridRange = 1.4, printPlot=T
-           ,axisLabels.y = items,legendLabels = labels
+           show.prc=T, legend.title="Response",show.n=T,values="sum.outside",
+           show.legend=T,expand.grid=F, digits=0,axis.title="Statement",grid.range = 1.4, prnt.plot=T
+           ,axis.labels = items,legend.labels = labels
            ,title = paste(grp_labels[i]," CSUMBES16: Agreement - Questions 67 - 72"))
 csumbes_likerts_agreement_1 <- csumbes_likerts_agreement
 #Q73-77 set agreement
@@ -311,9 +336,9 @@ items <- c(label(csumbes_Selected$Q73)
 sjp.likert(csumbes_likerts_agreement,
            geom.colors=colorset,reverse.colors=T,
            catcount=4, cat.neutral=5,cat.neutral.color = neutralColor,
-           showPercentageSign=T, legendTitle="Response",includeN=T,showItemLabels=T,value.labels="sum.outside",
-           hideLegend=F,expand.grid=F, labelDigits=0,axisTitle.x="Statement",gridRange = 1.4, printPlot=T
-           ,axisLabels.y = items,legendLabels = labels
+           show.prc=T, legend.title="Response",show.n=T,values="sum.outside",
+           show.legend=T,expand.grid=F, digits=0,axis.title="Statement",grid.range = 1.4, prnt.plot=T
+           ,axis.labels = items,legend.labels = labels
            ,title = paste(grp_labels[i]," CSUMBES16: Agreement - Questions 73 - 77"))
 csumbes_likerts_agreement_2 <- csumbes_likerts_agreement
 #Q78-88 - likert How often have professors provided
@@ -330,14 +355,14 @@ items <- c(label(csumbes_Selected$Q78),label(csumbes_Selected$Q79),label(csumbes
 sjp.likert(csumbes_likerts_often,
            geom.colors=colorset,reverse.colors=T,
            catcount=4, 
-           showPercentageSign=T, legendTitle="Response",includeN=T,showItemLabels=T,value.labels="sum.outside",
-           hideLegend=F,expand.grid=F, labelDigits=0,axisTitle.x="Statement",gridRange = 1.4, printPlot=T
-           ,axisLabels.y = items,legendLabels = labels
+           show.prc=T, legend.title="Response",show.n=T,values="sum.outside",
+           show.legend=T,expand.grid=F, digits=0,axis.title="Statement",grid.range = 1.4, prnt.plot=T
+           ,axis.labels = items,legend.labels = labels
            ,title = paste(grp_labels[i]," CSUMBES16: Professors Provided - Questions 78 - 88"))
 
 #Q89 - Freq - Advisor type
 sjp.frq(factor(csumbes_Selected$Q89_Label),coord.flip = T,geom.colors = colorset[4],sort.frq = "asc"
-        ,axisTitle.x=get_label(csumbes_Selected$Q89_Label),title="",axisLimits.y = c(0,cases))
+        ,axis.title=get_label(csumbes_Selected$Q89_Label),title="",ylim = c(0,cases))
 
 #Q91-94 set agreement
 csumbes_likerts_agreement <- data.frame(csumbes_Selected$Q90
@@ -357,113 +382,113 @@ items <- c(label(csumbes_Selected$Q90)
 sjp.likert(csumbes_likerts_agreement,
            geom.colors=colorset,reverse.colors=T,
            catcount=4, cat.neutral=5,cat.neutral.color = neutralColor,
-           showPercentageSign=T, legendTitle="Response",includeN=T,showItemLabels=T,value.labels="sum.outside",
-           hideLegend=F,expand.grid=F, labelDigits=0,axisTitle.x="Statement",gridRange = 1.4, printPlot=T
-           ,axisLabels.y = items,legendLabels = labels
+           show.prc=T, legend.title="Response",show.n=T,values="sum.outside",
+           show.legend=T,expand.grid=F, digits=0,axis.title="Statement",grid.range = 1.4, prnt.plot=T
+           ,axis.labels = items,legend.labels = labels
            ,title = paste(grp_labels[i]," CSUMBES16: My Advisor - Questions 90 - 94"))
 csumbes_likerts_agreement_3 <- csumbes_likerts_agreement
 #Q97 - res hall
 sjp.frq(factor(csumbes_Selected$Q97_Label),coord.flip = T,geom.colors = colorset[4],sort.frq = "asc"
-        ,axisTitle.x=get_label(csumbes_Selected$Q97_Label),title="")
+        ,axis.title=get_label(csumbes_Selected$Q97_Label),title="")
 
 #Q98 - family support
 plot1 <- sjp.frq(factor(csumbes_Selected$Q98_Label),coord.flip = T,geom.colors = colorset[4],sort.frq = "asc"
-        ,axisTitle.x=get_label(csumbes_Selected$Q98_Label),title="",printPlot = F,axisLimits.y = c(0,cases))
+        ,axis.title=get_label(csumbes_Selected$Q98_Label),title="",prnt.plot = F,ylim = c(0,cases))
 
 #Q99 - hours outside of school csumbes_Selected
 plot2 <- sjp.frq(factor(csumbes_Selected$Q99_Label),coord.flip = T,geom.colors = colorset[4],sort.frq = "asc"
-        ,axisTitle.x=get_label(csumbes_Selected$Q99_Label),title="",printPlot = F,axisLimits.y = c(0,cases/2))
+        ,axis.title=get_label(csumbes_Selected$Q99_Label),title="",prnt.plot = F,ylim = c(0,cases/2))
 grid.arrange(plot1$plot, plot2$plot, ncol = 2)
 
 #Q100 - confidence
 plot1 <- sjp.frq(factor(csumbes_Selected$Q100_Label),coord.flip = T,geom.colors = colorset[4],sort.frq = "asc"
-        ,axisTitle.x=get_label(csumbes_Selected$Q100_Label),title="",printPlot = F,axisLimits.y = c(0,cases))
+        ,axis.title=get_label(csumbes_Selected$Q100_Label),title="",prnt.plot = F,ylim = c(0,cases))
 
 #Q102 - plans
 Q102_Cases <- as.numeric(length(which(csumbes_Selected$Q102 != "NA")))
 plot2 <- sjp.frq(factor(csumbes_Selected$Q102_Label),coord.flip = T,geom.colors = colorset[4],sort.frq = "asc"
-        ,axisTitle.x=get_label(csumbes_Selected$Q102_Label),title="",printPlot = F,axisLimits.y = c(0,Q102_Cases))
+        ,axis.title=get_label(csumbes_Selected$Q102_Label),title="",prnt.plot = F,ylim = c(0,Q102_Cases))
 grid.arrange(plot1$plot, plot2$plot, ncol = 2)
 
 #Q103
 plot1 <- sjp.frq(factor(csumbes_Selected$Q103_Label),coord.flip = T,geom.colors = colorset[4]
-                 ,axisTitle.x=get_label(csumbes_Selected$Q103_Label),title="",printPlot = F,axisLimits.y = c(0,cases/2))
+                 ,axis.title=get_label(csumbes_Selected$Q103_Label),title="",prnt.plot = F,ylim = c(0,cases/2))
 #Q104
 plot2 <- sjp.frq(factor(csumbes_Selected$Q104_Label),coord.flip = T,geom.colors = colorset[4]
-                 ,axisTitle.x=get_label(csumbes_Selected$Q104_Label),title="",printPlot = F,axisLimits.y = c(0,cases))
+                 ,axis.title=get_label(csumbes_Selected$Q104_Label),title="",prnt.plot = F,ylim = c(0,cases))
 grid.arrange(plot1$plot, plot2$plot, ncol = 2)
 
 #demographic frequencies
 plot1 <- sjp.frq(factor(csumbes_Selected$D2_Label),coord.flip = T,geom.colors = colorset[4]
-        ,axisTitle.x=get_label(csumbes_Selected$D2_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+        ,axis.title=get_label(csumbes_Selected$D2_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 plot2 <- sjp.frq(factor(csumbes_Selected$D5_Label),coord.flip = T,geom.colors = colorset[4]
-        ,axisTitle.x=get_label(csumbes_Selected$D5_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+        ,axis.title=get_label(csumbes_Selected$D5_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 plot3 <- sjp.frq(factor(csumbes_Selected$D6_Label),coord.flip = T,geom.colors = colorset[4]
-        ,axisTitle.x=get_label(csumbes_Selected$D6_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+        ,axis.title=get_label(csumbes_Selected$D6_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 plot4 <- sjp.frq(factor(csumbes_Selected$D11_Label),coord.flip = T,geom.colors = colorset[4]
-                 ,axisTitle.x=get_label(csumbes_Selected$D11_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+                 ,axis.title=get_label(csumbes_Selected$D11_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 grid.arrange(plot1$plot, plot2$plot,plot3$plot, plot4$plot,  ncol = 2, nrow = 2)
 
 sjp.frq(factor(csumbes_Selected$D3_Label),coord.flip = T,geom.colors = colorset[4]
-        ,axisTitle.x=get_label(csumbes_Selected$D3_Label),title="",axisLimits.y = c(0,cases/2))
+        ,axis.title=get_label(csumbes_Selected$D3_Label),title="",ylim = c(0,cases/2))
 
 sjp.frq(factor(csumbes_Selected$D9_Label),coord.flip = T,geom.colors = colorset[4]
-        ,axisTitle.x=get_label(csumbes_Selected$D9_Label),title="",axisLimits.y = c(0,cases/2))
+        ,axis.title=get_label(csumbes_Selected$D9_Label),title="",ylim = c(0,cases/2))
 
 plot1 <- sjp.frq(factor(csumbes_Selected$D13_Label),coord.flip = T,geom.colors = colorset[4]
-                 ,axisTitle.x=get_label(csumbes_Selected$D13_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+                 ,axis.title=get_label(csumbes_Selected$D13_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 plot2 <- sjp.frq(factor(csumbes_Selected$D14_Label),coord.flip = T,geom.colors = colorset[4]
-                 ,axisTitle.x=get_label(csumbes_Selected$D14_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+                 ,axis.title=get_label(csumbes_Selected$D14_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 plot3 <- sjp.frq(factor(csumbes_Selected$D15_Label),coord.flip = T,geom.colors = colorset[4]
-                 ,axisTitle.x=get_label(csumbes_Selected$D15_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+                 ,axis.title=get_label(csumbes_Selected$D15_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 plot4 <- sjp.frq(factor(csumbes_Selected$D16_Label),coord.flip = T,geom.colors = colorset[4]
-                 ,axisTitle.x=get_label(csumbes_Selected$D16_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+                 ,axis.title=get_label(csumbes_Selected$D16_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 grid.arrange(plot1$plot, plot2$plot,plot3$plot, plot4$plot,  ncol = 2, nrow = 2)
 
 plot1 <- sjp.frq(factor(csumbes_Selected$D17_Label),coord.flip = T,geom.colors = colorset[4]
-                 ,axisTitle.x=get_label(csumbes_Selected$D17_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+                 ,axis.title=get_label(csumbes_Selected$D17_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 plot2 <- sjp.frq(factor(csumbes_Selected$D18_Label),coord.flip = T,geom.colors = colorset[4]
-                 ,axisTitle.x=get_label(csumbes_Selected$D18_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+                 ,axis.title=get_label(csumbes_Selected$D18_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 plot3 <- sjp.frq(factor(csumbes_Selected$D21_Label),coord.flip = T,geom.colors = colorset[4]
-                 ,axisTitle.x=get_label(csumbes_Selected$D21_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+                 ,axis.title=get_label(csumbes_Selected$D21_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 plot4 <- sjp.frq(factor(csumbes_Selected$D20_Label),coord.flip = T,geom.colors = colorset[4]
-                 ,axisTitle.x=get_label(csumbes_Selected$D20_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+                 ,axis.title=get_label(csumbes_Selected$D20_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 grid.arrange(plot1$plot, plot2$plot,plot3$plot, plot4$plot,  ncol = 2, nrow = 2)
 
 plot1 <- sjp.frq(factor(csumbes_Selected$D22_Label),coord.flip = T,geom.colors = colorset[4]
-                 ,axisTitle.x=get_label(csumbes_Selected$D22_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+                 ,axis.title=get_label(csumbes_Selected$D22_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 plot2 <- sjp.frq(factor(csumbes_Selected$D30_Label),coord.flip = T,geom.colors = colorset[4]
-                 ,axisTitle.x=get_label(csumbes_Selected$D30_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+                 ,axis.title=get_label(csumbes_Selected$D30_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 plot3 <- sjp.frq(factor(csumbes_Selected$D31_Label),coord.flip = T,geom.colors = colorset[4]
-                 ,axisTitle.x=get_label(csumbes_Selected$D31_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+                 ,axis.title=get_label(csumbes_Selected$D31_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 plot4 <- sjp.frq(factor(csumbes_Selected$D29_Label),coord.flip = T,geom.colors = colorset[4]
-                 ,axisTitle.x=get_label(csumbes_Selected$D29_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+                 ,axis.title=get_label(csumbes_Selected$D29_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 grid.arrange(plot1$plot, plot2$plot,plot3$plot, plot4$plot,  ncol = 2, nrow = 2)
 
 sjp.frq(factor(csumbes_Selected$D23_Label),coord.flip = T,geom.colors = colorset[4]
-        ,axisTitle.x=get_label(csumbes_Selected$D23_Label),title="",axisLimits.y = c(0,cases/2))
+        ,axis.title=get_label(csumbes_Selected$D23_Label),title="",ylim = c(0,cases/2))
 sjp.frq(factor(csumbes_Selected$D24_Label),coord.flip = T,geom.colors = colorset[4]
-        ,axisTitle.x=get_label(csumbes_Selected$D24_Label),title="")
+        ,axis.title=get_label(csumbes_Selected$D24_Label),title="")
 
 plot1 <- sjp.frq(factor(csumbes_Selected$D25_Label),coord.flip = T,geom.colors = colorset[4]
-        ,axisTitle.x=get_label(csumbes_Selected$D25_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+        ,axis.title=get_label(csumbes_Selected$D25_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 plot2 <- sjp.frq(factor(csumbes_Selected$D26_Label),coord.flip = T,geom.colors = colorset[4]
-        ,axisTitle.x=get_label(csumbes_Selected$D26_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+        ,axis.title=get_label(csumbes_Selected$D26_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 plot3 <- sjp.frq(factor(csumbes_Selected$D28_Label),coord.flip = T,geom.colors = colorset[4]
-        ,axisTitle.x=get_label(csumbes_Selected$D28_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.8))
+        ,axis.title=get_label(csumbes_Selected$D28_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.8))
 plot4 <- sjp.frq(factor(csumbes_Selected$D32_Label),coord.flip = T,geom.colors = colorset[4]
-        ,axisTitle.x=get_label(csumbes_Selected$D32_Label),title="",printPlot = F,axisLimits.y = c(0,cases * 1.5))
+        ,axis.title=get_label(csumbes_Selected$D32_Label),title="",prnt.plot = F,ylim = c(0,cases * 1.5))
 grid.arrange(plot1$plot, plot2$plot,plot3$plot, plot4$plot,  ncol = 2, nrow = 2)
 
 sjp.frq(factor(csumbes_Selected$D33_Label),coord.flip = T,geom.colors = colorset[4]
-        ,axisTitle.x=get_label(csumbes_Selected$D33_Label),title="")
+        ,axis.title=get_label(csumbes_Selected$D33_Label),title="")
 sjp.frq(csumbes_Selected$DAge,coord.flip = T,geom.colors = colorset[4]
-        ,axisTitle.x=get_label(csumbes_Selected$DAge),title="",type = "hist",showNormalCurve = T
-        ,showValueLabels = T,geom.size = 1)
+        ,axis.title=get_label(csumbes_Selected$DAge),title="",type = "hist",normal.curve = T
+        ,geom.size = 1)
 #sjp.frq(factor(csumbes_Selected$DCumlGPA_Cat),coord.flip = T,geom.colors = colorset[4]
-#        ,axisTitle.x=get_label(csumbes_Selected$DCumlGPA),title="")
+#        ,axis.title=get_label(csumbes_Selected$DCumlGPA),title="")
 sjp.frq(csumbes_Selected$DCumlGPA_Rounded,coord.flip = T,geom.colors = colorset[4]
-        ,axisTitle.x=get_label(csumbes_Selected$DCumlGPA),title="",type = "hist",showNormalCurve = T)
+        ,axis.title=get_label(csumbes_Selected$DCumlGPA),title="",type = "hist",normal.curve  = T)
 
 
 
@@ -544,7 +569,136 @@ plot1 <- ggplot(mc_df,aes(TutoringNeed,value,fill=variableLabel))+
   geom_text(aes(label=format(value,big.mark = ",")), position=position_dodge(width=0.9), vjust=0.3, hjust=-0.1)
 plot1 + theme(legend.title = element_blank())
 
+#short answer
+#Q26_11, Q89_5, Q89_7, Q95_17, Q96_17 short answer
 
+if(!require(tm)) {
+  install.packages("tm")
+}
+require(tm)
+if(!require(wordcloud)) {
+  install.packages("wordcloud")
+}
+require(wordcloud)
+defaultStopWords <- read.csv(file = "M:\\Institutional Assessment and Research\\private\\COMMON FOLDER\\CSUMB Experience Survey\\Spring 2016\\Analyses\\stopwords.txt",header = F)
+defaultStopWords <- as.character(defaultStopWords)
+myStopwords <- c("csumb")
+removeslash <- function(x) gsub("/", " ", x)
+
+#Sustainability
+short_answer_src <- data.frame(csumbes_Selected$Q26_11OT[csumbes_Selected$Q26_11OT != ""])
+short_answer <- DataframeSource(short_answer_src)
+short_answer <- Corpus(short_answer)
+#data cleanup
+short_answer <- tm_map(short_answer, tolower)
+short_answer <- tm_map(short_answer, removePunctuation)
+short_answer <- tm_map(short_answer, removeNumbers)
+short_answer <- tm_map(short_answer, stripWhitespace)
+short_answer<- tm_map(short_answer, removeslash)
+short_answer <- tm_map(short_answer, removeWords, stopwords('english'))
+short_answer <- tm_map(short_answer, removeWords, defaultStopWords)
+short_answer <- tm_map(short_answer, removeWords, myStopwords)
+short_answer <- tm_map(short_answer, PlainTextDocument)
+layout(matrix(c(1, 2), nrow=2), heights=c(1, 4))
+par(mar=rep(0, 4))
+plot.new()
+text(x=0.5, y=0.5, label(csumbes_Selected$Q26_11OT))
+wordcloud(short_answer,min.freq = length(short_answer)/100,max.words = 100,random.color = T,colors = colorset)
+#Advisor
+short_answer_src <- data.frame(csumbes_Selected$Q89_5OT[csumbes_Selected$Q89_5OT != ""])
+short_answer <- DataframeSource(short_answer_src)
+short_answer <- Corpus(short_answer)
+#data cleanup
+short_answer <- tm_map(short_answer, tolower)
+short_answer <- tm_map(short_answer, removePunctuation)
+short_answer <- tm_map(short_answer, removeNumbers)
+short_answer <- tm_map(short_answer, stripWhitespace)
+short_answer<- tm_map(short_answer, removeslash)
+short_answer <- tm_map(short_answer, removeWords, stopwords('english'))
+short_answer <- tm_map(short_answer, removeWords, defaultStopWords)
+short_answer <- tm_map(short_answer, removeWords, myStopwords)
+short_answer <- tm_map(short_answer, PlainTextDocument)
+layout(matrix(c(1, 2), nrow=2), heights=c(1, 4))
+par(mar=rep(0, 4))
+plot.new()
+text(x=0.5, y=0.5, label(csumbes_Selected$Q89_5OT))
+wordcloud(short_answer,min.freq = length(short_answer)/100,max.words = 100,random.color = T,colors = colorset)
+#Advisor
+short_answer_src <- data.frame(csumbes_Selected$Q89_7OT[csumbes_Selected$Q89_7OT != ""])
+short_answer <- DataframeSource(short_answer_src)
+short_answer <- Corpus(short_answer)
+#data cleanup
+short_answer <- tm_map(short_answer, tolower)
+short_answer <- tm_map(short_answer, removePunctuation)
+short_answer <- tm_map(short_answer, removeNumbers)
+short_answer <- tm_map(short_answer, stripWhitespace)
+short_answer<- tm_map(short_answer, removeslash)
+short_answer <- tm_map(short_answer, removeWords, stopwords('english'))
+short_answer <- tm_map(short_answer, removeWords, defaultStopWords)
+short_answer <- tm_map(short_answer, removeWords, myStopwords)
+short_answer <- tm_map(short_answer, PlainTextDocument)
+layout(matrix(c(1, 2), nrow=2), heights=c(1, 4))
+par(mar=rep(0, 4))
+plot.new()
+text(x=0.5, y=0.5, label(csumbes_Selected$Q89_7OT))
+wordcloud(short_answer,min.freq = length(short_answer)/100,max.words = 100,random.color = T,colors = colorset)
+#Tutoring Need
+short_answer_src <- data.frame(csumbes_Selected$Q95_17OT[csumbes_Selected$Q95_17OT != ""])
+short_answer <- DataframeSource(short_answer_src)
+short_answer <- Corpus(short_answer)
+#data cleanup
+short_answer <- tm_map(short_answer, tolower)
+short_answer <- tm_map(short_answer, removePunctuation)
+short_answer <- tm_map(short_answer, removeNumbers)
+short_answer <- tm_map(short_answer, stripWhitespace)
+short_answer<- tm_map(short_answer, removeslash)
+short_answer <- tm_map(short_answer, removeWords, stopwords('english'))
+short_answer <- tm_map(short_answer, removeWords, defaultStopWords)
+short_answer <- tm_map(short_answer, removeWords, myStopwords)
+short_answer <- tm_map(short_answer, PlainTextDocument)
+layout(matrix(c(1, 2), nrow=2), heights=c(1, 4))
+par(mar=rep(0, 4))
+plot.new()
+text(x=0.5, y=0.5, label(csumbes_Selected$Q95_17OT))
+wordcloud(short_answer,min.freq = length(short_answer)/100,max.words = 100,random.color = T,colors = colorset)
+#Tutoring Done
+short_answer_src <- data.frame(csumbes_Selected$Q96_17OT[csumbes_Selected$Q96_17OT != ""])
+short_answer <- DataframeSource(short_answer_src)
+short_answer <- Corpus(short_answer)
+#data cleanup
+short_answer <- tm_map(short_answer, tolower)
+short_answer <- tm_map(short_answer, removePunctuation)
+short_answer <- tm_map(short_answer, removeNumbers)
+short_answer <- tm_map(short_answer, stripWhitespace)
+short_answer<- tm_map(short_answer, removeslash)
+short_answer <- tm_map(short_answer, removeWords, stopwords('english'))
+short_answer <- tm_map(short_answer, removeWords, defaultStopWords)
+short_answer <- tm_map(short_answer, removeWords, myStopwords)
+short_answer <- tm_map(short_answer, PlainTextDocument)
+layout(matrix(c(1, 2), nrow=2), heights=c(1, 4))
+par(mar=rep(0, 4))
+plot.new()
+text(x=0.5, y=0.5, label(csumbes_Selected$Q96_17OT))
+wordcloud(short_answer,min.freq = length(short_answer)/100,max.words = 100,random.color = T,colors = colorset)
+#Leavers
+short_answer_src <- data.frame(csumbes_Selected$Q101_1OT[csumbes_Selected$Q101_1OT != ""])
+short_answer <- DataframeSource(short_answer_src)
+short_answer <- Corpus(short_answer)
+#data cleanup
+short_answer <- tm_map(short_answer, tolower)
+short_answer <- tm_map(short_answer, removePunctuation)
+short_answer <- tm_map(short_answer, removeNumbers)
+short_answer <- tm_map(short_answer, stripWhitespace)
+short_answer<- tm_map(short_answer, removeslash)
+short_answer <- tm_map(short_answer, removeWords, stopwords('english'))
+short_answer <- tm_map(short_answer, removeWords, defaultStopWords)
+short_answer <- tm_map(short_answer, removeWords, myStopwords)
+short_answer <- tm_map(short_answer, PlainTextDocument)
+layout(matrix(c(1, 2), nrow=2), heights=c(1, 4))
+par(mar=rep(0, 4))
+plot.new()
+text(x=0.5, y=0.5, label(csumbes_Selected$Q101_1OT))
+wordcloud(short_answer,min.freq = length(short_answer)/100,max.words = 100,random.color = T,colors = colorset)
 
 #Q101, Q105-107 should go to QSRT
 
